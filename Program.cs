@@ -1,5 +1,7 @@
 ﻿
 using System.Diagnostics;
+using Microsoft.Win32;
+
 
 
 //1) Проверь, что среди запущенных программ есть калькулятор
@@ -73,8 +75,21 @@ Console.WriteLine("\n\n");
 
 //4) Закрыть все копии ГуглХрома
 
-Console.WriteLine("\n\n");
+try
+{
+    var chromeCopyProcess = Process.GetProcessesByName("chrome");
+    foreach (var process in chromeCopyProcess.Skip(1))
+    {
+            process.Kill();
+            Console.WriteLine($"Instance of Google Chrome with ProcessId: {process.Id} has been closed.");
+    }
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"An error occurred while trying to close child instances of Google Chrome: {ex.Message}");
+}
 
+Console.WriteLine("\n\n");
 
 
 //5) Вывести список имен программ. Запросить у пользователя ид той, что нужно закрыть и сделать это
@@ -119,4 +134,37 @@ Console.WriteLine("\n\n");
 
 
 //6) Запретить запуск ГуглХрома
+
+
+MonitorChromeLaunch();
+Thread.Sleep(Timeout.Infinite);
+
+static void MonitorChromeLaunch()
+{
+    while(true)
+    {
+        var processes = Process.GetProcessesByName("chrome");
+        if (processes.Length > 0)
+        {
+            foreach (Process process in processes)
+            {
+                try
+                {
+                    process.Kill();
+                    Console.WriteLine("Google Chrome launch detected and terminated");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error terminatinating Chrome process: {ex.Message}");
+                }
+            }
+        }
+        Thread.Sleep(1000);
+    }
+};
+
+
 Console.WriteLine("\n\n");
+
+
+
